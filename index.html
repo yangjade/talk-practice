@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#2f6f4f">
+<title>聽話說話練習</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="說話練習">
+<style>
+  :root {
+    --bg: #f6f3ec;
+    --card: #ffffff;
+    --ink: #2b2b2b;
+    --muted: #6b6b6b;
+    --green: #2f6f4f;
+    --green-soft: #e3f1e8;
+    --orange: #d9822b;
+    --orange-soft: #fbeedd;
+    --blue: #2c5d8f;
+    --blue-soft: #e2ecf7;
+    --red: #b8433a;
+    --red-soft: #f8e3e1;
+    --radius: 22px;
+    --fs: 26px;
+  }
+  body.fs-l { --fs: 30px; }
+  body.fs-xl { --fs: 36px; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+    font-size: var(--fs);
+    line-height: 1.5;
+  }
+  header {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px;
+    background: var(--green); color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  header h1 { margin: 0; font-size: 1em; flex: 1; }
+  header button {
+    font-size: .8em; padding: 8px 18px; border-radius: 999px;
+    border: 2px solid rgba(255,255,255,.7); background: transparent; color: #fff; cursor: pointer;
+  }
+  main { max-width: 820px; margin: 0 auto; padding: 22px 16px 80px; }
+  .hidden { display: none !important; }
+
+  .card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 24px; margin-bottom: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.06);
+  }
+  .muted { color: var(--muted); font-size: .8em; }
+  .center { text-align: center; }
+
+  .menu { display: grid; gap: 18px; }
+  .menu button {
+    display: flex; align-items: center; gap: 20px; text-align: left;
+    width: 100%; padding: 26px 24px; border: none; border-radius: var(--radius);
+    font-size: 1em; font-weight: 700; color: var(--ink); cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+  }
+  .menu button .icon { font-size: 1.8em; line-height: 1; }
+  .menu button small { display: block; font-weight: 400; font-size: .7em; color: var(--muted); }
+  .m-listen { background: var(--blue-soft); }
+  .m-repeat { background: var(--orange-soft); }
+  .m-talk { background: var(--green-soft); }
+  .m-family { background: #eee; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 72px; padding: 14px 28px; border-radius: 999px; border: none;
+    font-size: 1em; font-weight: 700; cursor: pointer; color: #fff; background: var(--green);
+  }
+  .btn:active { transform: scale(.97); }
+  .btn.blue { background: var(--blue); }
+  .btn.orange { background: var(--orange); }
+  .btn.light { background: #e9e6df; color: var(--ink); }
+  .btn.big { width: 100%; min-height: 96px; font-size: 1.15em; }
+  .btn.small { min-height: 56px; font-size: .8em; padding: 8px 20px; }
+  .btn:disabled { opacity: .5; }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .row > .btn { flex: 1 1 200px; }
+
+  .question { font-size: 1.2em; font-weight: 700; margin: 6px 0 16px; }
+  .choices { display: grid; gap: 14px; }
+  .choice {
+    width: 100%; text-align: left; padding: 20px 24px; border-radius: 18px;
+    border: 3px solid #d9d4c7; background: #fff; font-size: 1em; cursor: pointer; color: var(--ink);
+  }
+  .choice.right { border-color: var(--green); background: var(--green-soft); }
+  .choice.wrong { border-color: var(--red); background: var(--red-soft); }
+
+  .sentence { font-size: 1.2em; line-height: 1.8; }
+  .part { padding: 2px 6px; border-radius: 8px; font-weight: 700; }
+  .part.p0 { background: #d6e6f7; }
+  .part.p1 { background: #fbe0c2; }
+  .part.p2 { background: #d4ecd9; }
+  .part.p3 { background: #eadcf5; }
+  .part.miss { background: var(--red-soft); color: var(--red); text-decoration: underline wavy; }
+  .part.hit { background: var(--green-soft); color: var(--green); }
+
+  .feedback { padding: 18px 22px; border-radius: 18px; margin-top: 16px; font-size: .95em; }
+  .feedback.good { background: var(--green-soft); color: #1f4d36; }
+  .feedback.bad { background: var(--orange-soft); color: #7a4510; }
+
+  .progress { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; }
+  .progress i { width: 18px; height: 18px; border-radius: 50%; background: #d9d4c7; }
+  .progress i.done { background: var(--green); }
+  .progress i.now { background: var(--orange); }
+
+  .bubble-wrap { display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px; }
+  .bubble { max-width: 88%; padding: 16px 20px; border-radius: 22px; }
+  .bubble.them { background: var(--blue-soft); align-self: flex-start; border-bottom-left-radius: 6px; }
+  .bubble.me { background: var(--green-soft); align-self: flex-end; border-bottom-right-radius: 6px; }
+  .bubble .who { font-size: .7em; color: var(--muted); display: block; }
+
+  .levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .scen-list { display: grid; gap: 14px; }
+
+  .mic {
+    width: 150px; height: 150px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--orange); color: #fff; font-size: 1.6em; font-weight: 700;
+    box-shadow: 0 6px 18px rgba(217,130,43,.4);
+  }
+  .mic.on { background: var(--red); animation: pulse 1.2s infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 22px rgba(184,67,58,.15); } }
+
+  label.field { display: block; margin: 14px 0 6px; font-weight: 700; font-size: .85em; }
+  input[type=text], textarea, select {
+    width: 100%; font-size: .9em; padding: 12px 14px; border-radius: 12px;
+    border: 2px solid #d9d4c7; font-family: inherit; background: #fff;
+  }
+  textarea { min-height: 90px; }
+  .seg { display: flex; gap: 10px; flex-wrap: wrap; }
+  .seg button {
+    flex: 1; min-height: 60px; font-size: .85em; border-radius: 14px; cursor: pointer;
+    border: 3px solid #d9d4c7; background: #fff; color: var(--ink);
+  }
+  .seg button.on { border-color: var(--green); background: var(--green-soft); font-weight: 700; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .item-list { list-style: none; padding: 0; margin: 0; }
+  .item-list li {
+    display: flex; gap: 10px; align-items: center; justify-content: space-between;
+    padding: 12px 0; border-bottom: 1px solid #eee; font-size: .85em;
+  }
+  table.stats { width: 100%; border-collapse: collapse; font-size: .8em; }
+  table.stats td, table.stats th { padding: 8px; border-bottom: 1px solid #eee; text-align: left; }
+  .big-emoji { font-size: 3em; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">聽話說話練習</h1>
+  <button id="homeBtn" class="hidden" onclick="go('home')">回首頁</button>
+</header>
+<main id="app"></main>
+
+<script>
+/* ============================================================
+   練習內容
+   listen 題目：一句話 + 幾個「重點」。每個重點會問一題。
+   ============================================================ */
+const LISTEN = [
+  // 第 1 級：一個重點
+  { level: 1, text: "我們中午十二點吃飯。",
+    parts: [{ key: "中午十二點", q: "什麼時候吃飯？", opts: ["早上八點", "中午十二點", "晚上六點"] }] },
+  { level: 1, text: "你的眼鏡放在電視旁邊。",
+    parts: [{ key: "電視旁邊", q: "眼鏡放在哪裡？", opts: ["床上", "電視旁邊", "廚房"] }] },
+  { level: 1, text: "等一下阿明會來看你。",
+    parts: [{ key: "阿明", q: "誰會來看你？", opts: ["阿明", "醫生", "鄰居"] }] },
+  { level: 1, text: "今天外面很冷，要穿外套。",
+    parts: [{ key: "穿外套", q: "出門要做什麼？", opts: ["帶雨傘", "穿外套", "戴帽子"] }] },
+  { level: 1, text: "藥要飯後吃。",
+    parts: [{ key: "飯後", q: "藥什麼時候吃？", opts: ["飯前", "飯後", "睡前"] }] },
+
+  // 第 2 級：兩個重點
+  { level: 2, text: "明天早上九點，我帶你去看醫生。",
+    parts: [
+      { key: "明天早上九點", q: "什麼時候？", opts: ["今天下午", "明天早上九點", "後天晚上"] },
+      { key: "看醫生", q: "要去做什麼？", opts: ["買菜", "看醫生", "去公園"] } ] },
+  { level: 2, text: "晚上女兒會打電話給你，你記得接。",
+    parts: [
+      { key: "女兒", q: "誰會打電話？", opts: ["兒子", "女兒", "鄰居"] },
+      { key: "記得接", q: "你要做什麼？", opts: ["記得接", "不要接", "打回去給她"] } ] },
+  { level: 2, text: "冰箱裡有粥，你肚子餓就拿出來熱。",
+    parts: [
+      { key: "粥", q: "冰箱裡有什麼？", opts: ["水果", "粥", "牛奶"] },
+      { key: "拿出來熱", q: "餓了要怎麼做？", opts: ["直接吃", "拿出來熱", "叫外送"] } ] },
+  { level: 2, text: "下雨了，出門記得帶傘，走路要慢慢走。",
+    parts: [
+      { key: "帶傘", q: "出門要帶什麼？", opts: ["帶傘", "帶錢包", "帶手機"] },
+      { key: "慢慢走", q: "走路要怎樣？", opts: ["快一點", "慢慢走", "坐車"] } ] },
+  { level: 2, text: "我去超市買東西，大概一個小時回來。",
+    parts: [
+      { key: "超市", q: "我去哪裡？", opts: ["超市", "銀行", "公司"] },
+      { key: "一個小時", q: "多久回來？", opts: ["十分鐘", "一個小時", "明天"] } ] },
+
+  // 第 3 級：三個重點（最容易只聽到中間）
+  { level: 3, text: "明天早上十點，我們去醫院看牙齒，記得帶健保卡。",
+    parts: [
+      { key: "明天早上十點", q: "什麼時候？", opts: ["今天晚上", "明天早上十點", "下個禮拜"] },
+      { key: "看牙齒", q: "去醫院做什麼？", opts: ["看眼睛", "看牙齒", "拿藥"] },
+      { key: "健保卡", q: "要帶什麼？", opts: ["雨傘", "健保卡", "便當"] } ] },
+  { level: 3, text: "星期六中午，小華要帶孩子回來吃飯，你不用煮，我會買便當。",
+    parts: [
+      { key: "星期六中午", q: "什麼時候？", opts: ["星期六中午", "星期一早上", "今天晚上"] },
+      { key: "小華要帶孩子回來", q: "誰要回來？", opts: ["小華和孩子", "隔壁阿姨", "醫生"], ans: "小華和孩子" },
+      { key: "你不用煮", q: "你要煮飯嗎？", opts: ["要煮很多", "不用煮", "煮一點點"] } ] },
+  { level: 3, text: "如果有人按門鈴，先不要開門，打電話問我，我的號碼貼在冰箱上。",
+    parts: [
+      { key: "先不要開門", q: "有人按門鈴要怎麼做？", opts: ["馬上開門", "先不要開門", "大聲問是誰"] },
+      { key: "打電話問我", q: "然後要做什麼？", opts: ["打電話問我", "去睡覺", "叫警察"] },
+      { key: "冰箱上", q: "號碼貼在哪裡？", opts: ["門上", "冰箱上", "電話旁邊"] } ] },
+  { level: 3, text: "這個藥一天吃三次，每次一顆，吃完要多喝水。",
+    parts: [
+      { key: "一天吃三次", q: "一天吃幾次？", opts: ["一次", "兩次", "三次"], ans: "三次" },
+      { key: "每次一顆", q: "每次吃幾顆？", opts: ["一顆", "兩顆", "半顆"], ans: "一顆" },
+      { key: "多喝水", q: "吃完要做什麼？", opts: ["多喝水", "馬上睡覺", "吃水果"] } ] },
+  { level: 3, text: "等一下我先去接孫子，然後去郵局寄東西，六點前會到家。",
+    parts: [
+      { key: "接孫子", q: "我先去做什麼？", opts: ["接孫子", "買菜", "看醫生"] },
+      { key: "郵局寄東西", q: "然後去哪裡？", opts: ["銀行", "郵局", "市場"], ans: "郵局" },
+      { key: "六點前", q: "幾點前會到家？", opts: ["三點前", "六點前", "九點前"] } ] },
+];
+
+/* 對話情境：對方說一句，長輩回答。
+   choices 裡 good:true 是好的回答；keys 用來判斷語音回答有沒有說到重點。 */
+const TALKS = [
+  { id: "neighbor", icon: "👋", title: "跟鄰居打招呼", who: "鄰居王太太",
+    turns: [
+      { say: "早安！今天要去哪裡啊？",
+        tip: "對方問「去哪裡」，要說出一個地方。",
+        keys: ["公園", "市場", "散步", "買菜", "醫院", "走走", "家"],
+        choices: [
+          { text: "早安！我要去公園散步。", good: true, fb: "很好！有打招呼，也說了要去哪裡。" },
+          { text: "早安。", good: false, fb: "有打招呼很好，但她問「去哪裡」，要再說一個地方喔。" },
+          { text: "今天天氣很好。", good: false, fb: "她問的是「去哪裡」，不是天氣。可以說：我要去公園。" } ] },
+      { say: "好啊，要不要我陪你一起走？",
+        tip: "對方問「要不要」，先回答要或不要，再多說一句。",
+        keys: ["好", "要", "不用", "謝謝", "一起"],
+        choices: [
+          { text: "好啊，謝謝你，我們一起走。", good: true, fb: "很好！回答了要，還說了謝謝。" },
+          { text: "公園有很多人。", good: false, fb: "她問你「要不要一起走」，先回答「好」或「不用」。" },
+          { text: "不用了，謝謝你，我自己慢慢走。", good: true, fb: "很好！不用也可以，而且很有禮貌。" } ] },
+      { say: "那我們走吧，路上小心喔。",
+        tip: "可以說謝謝或好。",
+        keys: ["好", "謝謝", "走"],
+        choices: [
+          { text: "好，謝謝。", good: true, fb: "很好！對話很完整。" },
+          { text: "我要去公園。", good: false, fb: "剛剛說過了喔。現在可以回答：好，謝謝。" } ] } ] },
+
+  { id: "doctor", icon: "🏥", title: "看醫生", who: "醫生",
+    turns: [
+      { say: "你好，今天哪裡不舒服？",
+        tip: "醫生問「哪裡」不舒服，要說身體的地方。",
+        keys: ["頭", "肚子", "腳", "膝蓋", "喉嚨", "咳嗽", "牙", "腰", "胸", "痛"],
+        choices: [
+          { text: "我的膝蓋很痛。", good: true, fb: "很好！清楚說出哪裡不舒服。" },
+          { text: "我很不舒服。", good: false, fb: "醫生要知道「哪裡」不舒服，要說出地方，例如：膝蓋。" },
+          { text: "我兒子帶我來的。", good: false, fb: "醫生問的是哪裡不舒服喔。" } ] },
+      { say: "痛多久了？是這幾天，還是很久了？",
+        tip: "醫生問「多久」，要說時間。",
+        keys: ["天", "禮拜", "星期", "月", "年", "很久", "昨天"],
+        choices: [
+          { text: "大概三天了。", good: true, fb: "很好！說出了多久。" },
+          { text: "走路的時候會痛。", good: false, fb: "這個也有用，但醫生問的是「多久」，例如：三天了。" },
+          { text: "很痛很痛。", good: false, fb: "醫生問的是痛「多久」，要說時間喔。" } ] },
+      { say: "好，我開藥給你，一天吃兩次，早上跟晚上。你記住了嗎？",
+        tip: "把重點說回去給醫生聽，確認自己聽對。",
+        keys: ["兩次", "早上", "晚上", "記住"],
+        choices: [
+          { text: "記住了，一天兩次，早上跟晚上。", good: true, fb: "太棒了！把重點說一遍，最不容易忘。" },
+          { text: "好。", good: false, fb: "可以更好：把醫生說的重點再說一遍——一天兩次，早上跟晚上。" },
+          { text: "晚上吃。", good: false, fb: "只聽到後面喔。醫生說：一天兩次，「早上」跟「晚上」。" } ] } ] },
+
+  { id: "phone", icon: "📞", title: "接家人電話", who: "女兒",
+    turns: [
+      { say: "喂，媽，是我。你吃飯了沒？",
+        tip: "問「吃了沒」，回答吃了或還沒，可以說吃什麼。",
+        keys: ["吃", "還沒", "了"],
+        choices: [
+          { text: "吃了，我吃了稀飯。", good: true, fb: "很好！有回答，還多說了吃什麼。" },
+          { text: "喂？", good: false, fb: "她問你吃飯了沒，可以說：吃了，或還沒。" },
+          { text: "今天好熱。", good: false, fb: "她問的是吃飯了沒喔。" } ] },
+      { say: "我禮拜天下午會回去，要幫你買什麼嗎？",
+        tip: "這句有兩個重點：什麼時候回來、要買什麼。",
+        keys: ["買", "不用", "水果", "牛奶", "麵包", "藥", "禮拜天"],
+        choices: [
+          { text: "好，禮拜天下午。幫我買一些水果。", good: true, fb: "太棒了！兩個重點都回答到了。" },
+          { text: "買水果。", good: false, fb: "有回答買什麼，很好！也可以說一下「禮拜天下午」確認時間。" },
+          { text: "你什麼時候回來？", good: false, fb: "她剛剛說了：禮拜天下午。要注意聽句子的前面喔。" } ] },
+      { say: "好，那禮拜天見，拜拜。",
+        tip: "說再見。",
+        keys: ["拜", "再見", "好"],
+        choices: [
+          { text: "好，禮拜天見，拜拜。", good: true, fb: "很好！" },
+          { text: "買水果。", good: false, fb: "她要掛電話了，說：好，拜拜。" } ] } ] },
+
+  { id: "market", icon: "🛒", title: "去市場買菜", who: "老闆",
+    turns: [
+      { say: "要買什麼？今天高麗菜很新鮮喔。",
+        tip: "說你要買什麼。",
+        keys: ["要", "買", "菜", "高麗菜", "番茄", "蛋", "顆", "斤"],
+        choices: [
+          { text: "我要一顆高麗菜。", good: true, fb: "很好！說清楚要什麼、要多少。" },
+          { text: "很新鮮。", good: false, fb: "老闆問你要買什麼喔，可以說：我要一顆高麗菜。" },
+          { text: "嗯。", good: false, fb: "要說出你想買的東西喔。" } ] },
+      { say: "好，一顆五十塊，還要別的嗎？",
+        tip: "這句有兩個重點：多少錢、還要不要別的。",
+        keys: ["不用", "還要", "好", "五十", "這樣"],
+        choices: [
+          { text: "不用了，這樣就好，給你五十塊。", good: true, fb: "太棒了！回答了，也記得是五十塊。" },
+          { text: "多少錢？", good: false, fb: "老闆剛剛說了：五十塊。要注意聽句子前面。" },
+          { text: "我還要三顆番茄。", good: true, fb: "很好！清楚說出還要什麼。" } ] },
+      { say: "謝謝，慢走喔！",
+        tip: "說謝謝或再見。",
+        keys: ["謝", "再見", "拜"],
+        choices: [
+          { text: "謝謝，再見。", good: true, fb: "很好！" },
+          { text: "高麗菜。", good: false, fb: "老闆在說再見了，回答：謝謝，再見。" } ] } ] },
+];
+
+/* ============================================================
+   儲存
+   ============================================================ */
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem("tp_" + k)) ?? d; } catch { return d; } },
+  set(k, v) { localStorage.setItem("tp_" + k, JSON.stringify(v)); },
+};
+const settings = Object.assign({ rate: 0.75, fs: "l", name: "" }, store.get("settings", {}));
+function saveSettings() { store.set("settings", settings); applyFont(); }
+function applyFont() { document.body.className = settings.fs === "m" ? "" : "fs-" + settings.fs; }
+function customItems() { return store.get("custom", []); }
+function allListen() { return LISTEN.concat(customItems().map(c => ({ ...c, custom: true }))); }
+function logResult(type, title, got, total) {
+  const h = store.get("history", []);
+  h.unshift({ t: Date.now(), type, title, got, total });
+  store.set("history", h.slice(0, 300));
+}
+
+/* ============================================================
+   語音：唸出來 / 聽他說
+   ============================================================ */
+let zhVoice = null;
+function pickVoice() {
+  const vs = speechSynthesis.getVoices();
+  zhVoice = vs.find(v => /zh[-_]TW/i.test(v.lang)) || vs.find(v => /zh[-_](HK|CN)/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null;
+}
+if ("speechSynthesis" in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+
+function speak(text, { rate = settings.rate } = {}) {
+  return new Promise(res => {
+    if (!("speechSynthesis" in window)) return res();
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = zhVoice ? zhVoice.lang : "zh-TW";
+    if (zhVoice) u.voice = zhVoice;
+    u.rate = rate;
+    u.onend = u.onerror = () => res();
+    speechSynthesis.speak(u);
+  });
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+/* 分段慢慢唸：在逗號處停頓，幫助聽完整句 */
+async function speakInChunks(text) {
+  const chunks = text.split(/[，。、！？,.!?]/).map(s => s.trim()).filter(Boolean);
+  for (const c of chunks) { await speak(c, { rate: Math.max(0.55, settings.rate - 0.15) }); await sleep(700); }
+}
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function listenOnce() {
+  return new Promise((res, rej) => {
+    if (!SR) return rej(new Error("unsupported"));
+    speechSynthesis.cancel();
+    const r = new SR();
+    r.lang = "zh-TW"; r.interimResults = false; r.maxAlternatives = 3;
+    let best = "";
+    r.onresult = e => { best = Array.from(e.results[0]).map(a => a.transcript).join(" "); };
+    r.onerror = e => rej(e.error);
+    r.onend = () => res(best);
+    r.start();
+    listenOnce.stop = () => r.stop();
+  });
+}
+
+/* ============================================================
+   比對：他說的內容有沒有包含重點
+   ============================================================ */
+const CN = "零一二三四五六七八九";
+function numToCn(n) {
+  n = parseInt(n, 10);
+  if (n < 10) return CN[n];
+  if (n < 20) return "十" + (n % 10 ? CN[n % 10] : "");
+  if (n < 100) return CN[Math.floor(n / 10)] + "十" + (n % 10 ? CN[n % 10] : "");
+  return String(n);
+}
+function norm(s) {
+  return s.replace(/\d+/g, numToCn)
+    .replace(/[兩]/g, "二").replace(/[禮拜星期週周]/g, "期").replace(/[臺]/g, "台")
+    .replace(/[\s，。、！？,.!?「」]/g, "");
+}
+function lcs(a, b) {
+  const dp = Array(b.length + 1).fill(0);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = 0;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = dp[j];
+      dp[j] = a[i - 1] === b[j - 1] ? prev + 1 : Math.max(dp[j], dp[j - 1]);
+      prev = tmp;
+    }
+  }
+  return dp[b.length];
+}
+function heard(said, key) {
+  const s = norm(said), k = norm(key);
+  if (!k) return false;
+  if (s.includes(k)) return true;
+  return lcs(s, k) / k.length >= 0.6;
+}
+
+/* ============================================================
+   畫面工具
+   ============================================================ */
+const $app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function setTitle(t, showHome = true) {
+  document.getElementById("title").textContent = t;
+  document.getElementById("homeBtn").classList.toggle("hidden", !showHome);
+}
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function answerOf(p) { return p.ans || p.opts.find(o => o === p.key) || p.opts.find(o => p.key.includes(o) || o.includes(p.key)) || p.key; }
+function highlight(text, parts, cls) {
+  let html = esc(text);
+  parts.forEach((p, i) => {
+    const k = esc(p.key);
+    const c = cls ? cls[i] : "p" + (i % 4);
+    html = html.replace(k, `<span class="part ${c}">${k}</span>`);
+  });
+  return html;
+}
+function dots(n, i) {
+  return `<div class="progress">${Array.from({ length: n }, (_, k) => `<i class="${k < i ? "done" : k === i ? "now" : ""}"></i>`).join("")}</div>`;
+}
+function praise() { return shuffle(["答對了！", "很棒！", "聽得很清楚！", "好厲害！"])[0]; }
+
+/* ============================================================
+   首頁
+   ============================================================ */
+function home() {
+  setTitle("聽話說話練習", false);
+  const name = settings.name ? esc(settings.name) + "，" : "";
+  $app.innerHTML = `
+    <div class="card center">
+      <div class="big-emoji">😊</div>
+      <div>${name}今天一起練習吧！</div>
+      <div class="muted">一次練幾題就好，慢慢來。</div>
+    </div>
+    <div class="menu">
+      <button class="m-listen" onclick="go('listenLevels')"><span class="icon">👂</span>
+        <span>聽懂練習<small>聽完一整句話，回答問題</small></span></button>
+      <button class="m-repeat" onclick="go('repeatLevels')"><span class="icon">🗣️</span>
+        <span>跟著說<small>聽一句話，完整說一遍</small></span></button>
+      <button class="m-talk" onclick="go('talkList')"><span class="icon">💬</span>
+        <span>對話練習<small>練習跟別人一來一往聊天</small></span></button>
+      <button class="m-family" onclick="go('family')"><span class="icon">⚙️</span>
+        <span>家人設定<small>自己出題、看練習紀錄、調整聲音字體</small></span></button>
+    </div>`;
+  speak((settings.name ? settings.name + "，" : "") + "今天一起練習吧！");
+}
+
+function levelPicker(mode) {
+  const label = { 1: "簡單", 2: "中等", 3: "進階" };
+  const desc = { 1: "一句話有一個重點", 2: "一句話有兩個重點", 3: "一句話有三個重點" };
+  const items = allListen();
+  const custom = items.filter(x => x.custom).length;
+  $app.innerHTML = `
+    <div class="card"><div>${mode === "listen" ? "先聽完整句話，再回答問題。" : "先聽一句話，然後把它完整說一遍。"}</div>
+      <div class="muted">從簡單的開始，答得好再往上。</div></div>
+    <div class="levels">
+      ${[1, 2, 3].map(l => `<button class="btn big ${l === 1 ? "" : l === 2 ? "blue" : "orange"}" onclick="startSet('${mode}', ${l})">
+        ${label[l]}<br><span style="font-weight:400;font-size:.65em">${desc[l]}</span></button>`).join("")}
+      ${custom ? `<button class="btn big light" onclick="startSet('${mode}', 'custom')">家人出的題目<br><span style="font-weight:400;font-size:.65em">${custom} 題</span></button>` : ""}
+    </div>`;
+}
+
+/* ============================================================
+   聽懂練習
+   ============================================================ */
+let set = null;
+function startSet(mode, level) {
+  const pool = allListen().filter(x => level === "custom" ? x.custom : x.level === level && !x.custom);
+  set = { mode, level, items: shuffle(pool).slice(0, 5), i: 0, got: 0, total: 0 };
+  mode === "listen" ? listenItem() : repeatItem();
+}
+
+function listenItem() {
+  const it = set.items[set.i];
+  set.cur = { part: 0, heardOnce: false, missed: [] };
+  setTitle(`聽懂練習　第 ${set.i + 1} 題`);
+  $app.innerHTML = `
+    ${dots(set.items.length, set.i)}
+    <div class="card center">
+      <div class="question">請仔細聽，<br>要聽到最後一個字喔！</div>
+      <div class="row">
+        <button class="btn big blue" onclick="playSentence()">🔊 聽這句話</button>
+      </div>
+      <div id="replayRow" class="row hidden" style="margin-top:14px">
+        <button class="btn light" onclick="speakInChunks(set.items[set.i].text)">🐢 一段一段慢慢唸</button>
+      </div>
+    </div>
+    <div id="qArea"></div>`;
+  setTimeout(playSentence, 400);
+}
+async function playSentence() {
+  const it = set.items[set.i];
+  await speak(it.text);
+  if (!set.cur.heardOnce) { set.cur.heardOnce = true; document.getElementById("replayRow")?.classList.remove("hidden"); showPartQ(); }
+}
+function showPartQ() {
+  const it = set.items[set.i], p = it.parts[set.cur.part];
+  const opts = shuffle(p.opts);
+  document.getElementById("qArea").innerHTML = `
+    <div class="card">
+      ${it.parts.length > 1 ? `<div class="muted">問題 ${set.cur.part + 1} / ${it.parts.length}</div>` : ""}
+      <div class="question">${esc(p.q)} <button class="btn small light" onclick="speak(set.items[set.i].parts[set.cur.part].q)">🔊</button></div>
+      <div class="choices">${opts.map(o => `<button class="choice" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>
+      <div id="fb"></div>
+    </div>`;
+  speak(p.q);
+  let tries = 0;
+  document.querySelectorAll("#qArea .choice").forEach(b => b.onclick = async () => {
+    const correct = answerOf(p);
+    if (b.dataset.o === correct) {
+      b.classList.add("right");
+      document.querySelectorAll("#qArea .choice").forEach(x => x.disabled = true);
+      if (tries === 0) set.got++;
+      else set.cur.missed.push(set.cur.part);
+      set.total++;
+      const msg = tries === 0 ? praise() : "對了！";
+      document.getElementById("fb").innerHTML = `<div class="feedback good">✅ ${msg}</div>`;
+      await speak(msg);
+      await sleep(500);
+      set.cur.part++;
+      set.cur.part < it.parts.length ? showPartQ() : listenSummary();
+    } else {
+      tries++;
+      b.classList.add("wrong"); b.disabled = true;
+      const pos = it.parts.length > 1 ? ["前面", "中間", "後面"][Math.min(set.cur.part, 2)] : "";
+      document.getElementById("fb").innerHTML = `<div class="feedback bad">再聽一次${pos ? `，注意聽句子的<b>${pos}</b>` : ""}。</div>`;
+      await speak("沒關係，再聽一次" + (pos ? "，注意聽句子的" + pos : ""));
+      await sleep(300);
+      await speak(it.text, { rate: Math.max(0.55, settings.rate - 0.15) });
+    }
+  });
+}
+async function listenSummary() {
+  const it = set.items[set.i];
+  const n = it.parts.length, ok = n - set.cur.missed.length;
+  const cls = it.parts.map((_, i) => set.cur.missed.includes(i) ? "miss" : "p" + (i % 4));
+  document.getElementById("qArea").innerHTML = `
+    <div class="card">
+      <div class="muted">完整的句子是：</div>
+      <div class="sentence">${highlight(it.text, it.parts, cls)}</div>
+      ${n > 1 ? `<div class="feedback ${ok === n ? "good" : "bad"}">這句話有 <b>${n}</b> 個重點，你第一次就聽到 <b>${ok}</b> 個。
+        ${ok < n ? "<br>紅色的部分下次要特別注意聽。" : ""}</div>` : ""}
+      <div class="row" style="margin-top:16px">
+        <button class="btn light" onclick="speak(set.items[set.i].text)">🔊 再聽一次</button>
+        <button class="btn" onclick="nextItem()">下一題 ➜</button>
+      </div>
+    </div>`;
+  document.getElementById("qArea").scrollIntoView({ behavior: "smooth" });
+  if (n > 1) await speak(`這句話有${n}個重點，你聽到了${ok}個。`);
+}
+function nextItem() {
+  set.i++;
+  if (set.i < set.items.length) return set.mode === "listen" ? listenItem() : repeatItem();
+  finishSet();
+}
+function finishSet() {
+  const title = set.mode === "listen" ? "聽懂練習" : "跟著說";
+  logResult(set.mode, `${title}（${set.level === "custom" ? "家人題目" : "第" + set.level + "級"}）`, set.got, set.total);
+  const pct = set.total ? set.got / set.total : 0;
+  const msg = pct >= 0.8 ? "太厲害了！" : pct >= 0.5 ? "做得很好！" : "有進步！多練幾次會更好。";
+  setTitle(title);
+  $app.innerHTML = `
+    <div class="card center">
+      <div class="big-emoji">${pct >= 0.8 ? "🏆" : pct >= 0.5 ? "🌟" : "💪"}</div>
+      <div class="question">${msg}</div>
+      <div>一共 ${set.total} 個重點，第一次就答對 ${set.got} 個。</div>
+    </div>
+    <div class="row">
+      <button class="btn big" onclick="startSet('${set.mode}', ${set.level === "custom" ? "'custom'" : set.level})">再練一次</button>
+      <button class="btn big light" onclick="go('home')">回首頁</button>
+    </div>`;
+  speak(msg);
+}
+
+/* ============================================================
+   跟著說
+   ============================================================ */
+function repeatItem() {
+  const it = set.items[set.i];
+  set.cur = { tries: 0 };
+  setTitle(`跟著說　第 ${set.i + 1} 題`);
+  $app.innerHTML = `
+    ${dots(set.items.length, set.i)}
+    <div class="card center">
+      <div class="question">聽完以後，把整句話說一遍。</div>
+      <div class="row">
+        <button class="btn big blue" onclick="speak(set.items[set.i].text)">🔊 聽這句話</button>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn light" onclick="speakInChunks(set.items[set.i].text)">🐢 一段一段慢慢唸</button>
+      </div>
+    </div>
+    <div class="card center" id="micCard">
+      ${SR ? `<button class="mic" id="mic" onclick="doRepeat()">🎤<br><span style="font-size:.5em">按我說話</span></button>
+             <div class="muted" style="margin-top:10px">按下去以後，說完整句話</div>`
+           : `<div class="muted">這個瀏覽器不能錄音（建議用 Chrome）。<br>請說出來給家人聽，再按下面的按鈕。</div>
+              <div class="row" style="margin-top:14px">
+                <button class="btn" onclick="selfCheck(true)">👍 說完整了</button>
+                <button class="btn orange" onclick="selfCheck(false)">還差一點</button>
+              </div>`}
+      <div id="fb"></div>
+    </div>`;
+  setTimeout(() => speak(it.text), 400);
+}
+async function doRepeat() {
+  const it = set.items[set.i], mic = document.getElementById("mic");
+  if (mic.classList.contains("on")) { listenOnce.stop?.(); return; }
+  mic.classList.add("on"); mic.innerHTML = "⏹<br><span style='font-size:.5em'>說完按我</span>";
+  let said = "";
+  try { said = await listenOnce(); } catch (e) {
+    mic.classList.remove("on"); mic.innerHTML = "🎤<br><span style='font-size:.5em'>按我說話</span>";
+    document.getElementById("fb").innerHTML = `<div class="feedback bad">${e === "not-allowed" ? "請允許使用麥克風。" : "沒有聽清楚，再試一次。"}</div>`;
+    return;
+  }
+  mic.classList.remove("on"); mic.innerHTML = "🎤<br><span style='font-size:.5em'>再說一次</span>";
+  if (!said) { document.getElementById("fb").innerHTML = `<div class="feedback bad">沒有聽到聲音，大聲一點再試一次。</div>`; return; }
+  const hits = it.parts.map(p => heard(said, p.key));
+  const ok = hits.filter(Boolean).length, n = hits.length;
+  if (set.cur.tries === 0) { set.got += ok; set.total += n; }
+  set.cur.tries++;
+  const cls = hits.map(h => h ? "hit" : "miss");
+  const missed = it.parts.filter((_, i) => !hits[i]).map(p => p.key);
+  document.getElementById("fb").innerHTML = `
+    <div class="feedback ${ok === n ? "good" : "bad"}" style="text-align:left">
+      <div class="muted">你說的是：</div><div>「${esc(said)}」</div>
+      <div class="muted" style="margin-top:10px">原本的句子（綠色＝有說到，紅色＝漏掉了）：</div>
+      <div class="sentence">${highlight(it.text, it.parts, cls)}</div>
+      <div style="margin-top:10px">${ok === n ? "✅ 重點全部都說到了！" : `說到 ${ok} 個重點，還漏了：<b>${missed.map(esc).join("、")}</b>`}</div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      ${ok < n ? `<button class="btn light" onclick="speak(set.items[set.i].text)">🔊 再聽一次</button>` : ""}
+      <button class="btn" onclick="nextItem()">下一題 ➜</button>
+    </div>`;
+  if (ok === n) await speak(praise() + "重點全部都說到了！");
+  else { await speak("很好，還漏了"); for (const m of missed) { await speak(m); await sleep(300); } }
+}
+function selfCheck(good) {
+  const it = set.items[set.i];
+  if (set.cur.tries === 0) { set.total += it.parts.length; if (good) set.got += it.parts.length; }
+  set.cur.tries++;
+  document.getElementById("fb").innerHTML = `
+    <div class="feedback ${good ? "good" : "bad"}" style="text-align:left">
+      <div class="muted">重點（每一個都要說到）：</div>
+      <div class="sentence">${highlight(it.text, it.parts)}</div></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn light" onclick="speak(set.items[set.i].text)">🔊 再聽一次</button>
+      <button class="btn" onclick="nextItem()">下一題 ➜</button></div>`;
+}
+
+/* ============================================================
+   對話練習
+   ============================================================ */
+function talkList() {
+  $app.innerHTML = `
+    <div class="card"><div>對方會先說一句話，你來回答。</div>
+      <div class="muted">聽不清楚的時候，可以按「請再說一次」，這在真的聊天時也可以用喔！</div></div>
+    <div class="scen-list">
+      ${TALKS.map(t => `<button class="choice" onclick="startTalk('${t.id}')"><span style="font-size:1.4em">${t.icon}</span> ${esc(t.title)}</button>`).join("")}
+    </div>`;
+}
+let talk = null;
+function startTalk(id) {
+  const s = TALKS.find(t => t.id === id);
+  talk = { s, i: 0, log: [], good: 0 };
+  setTitle(s.icon + " " + s.title);
+  talkTurn();
+}
+function renderBubbles() {
+  return `<div class="bubble-wrap">${talk.log.map(l => `<div class="bubble ${l.me ? "me" : "them"}"><span class="who">${l.me ? "我" : esc(talk.s.who)}</span>${esc(l.text)}</div>`).join("")}</div>`;
+}
+async function talkTurn() {
+  const t = talk.s.turns[talk.i];
+  talk.log.push({ me: false, text: t.say });
+  talk.tries = 0;
+  $app.innerHTML = `
+    ${dots(talk.s.turns.length, talk.i)}
+    ${renderBubbles()}
+    <div class="card" id="answerCard">
+      <div class="row">
+        <button class="btn light" onclick="askAgain()">🙋 請再說一次</button>
+        <button class="btn light" onclick="showTip()">💡 提示</button>
+      </div>
+      <div id="tip"></div>
+      ${SR ? `<div class="center" style="margin:20px 0"><button class="mic" id="mic" onclick="talkSpeak()">🎤<br><span style="font-size:.5em">用說的回答</span></button></div>
+              <div class="center muted">或是選一個回答：</div>` : `<div class="muted" style="margin-top:14px">選一個回答：</div>`}
+      <div class="choices" style="margin-top:12px">${shuffle(t.choices).map(c => `<button class="choice" data-t="${esc(c.text)}">${esc(c.text)}</button>`).join("")}</div>
+      <div id="fb"></div>
+    </div>`;
+  document.querySelectorAll("#answerCard .choice").forEach(b => b.onclick = () => {
+    const c = t.choices.find(x => x.text === b.dataset.t);
+    judge(c, b);
+  });
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  await sleep(300);
+  await speak(t.say);
+}
+async function askAgain() {
+  const t = talk.s.turns[talk.i];
+  document.getElementById("fb").innerHTML = `<div class="feedback good">👍 聽不清楚就說「請再說一次」，這樣很好！</div>`;
+  await speak("好，我再說一次。", { rate: settings.rate });
+  await speakInChunks(t.say);
+}
+function showTip() {
+  const t = talk.s.turns[talk.i];
+  document.getElementById("tip").innerHTML = `<div class="feedback bad">💡 ${esc(t.tip)}</div>`;
+  speak(t.tip);
+}
+async function judge(c, btn) {
+  if (c.good) {
+    btn?.classList.add("right");
+    document.querySelectorAll("#answerCard .choice, #answerCard .btn, #mic").forEach(x => x.disabled = true);
+    if (talk.tries === 0) talk.good++;
+    talk.log.push({ me: true, text: c.text });
+    document.getElementById("fb").innerHTML = `<div class="feedback good">✅ ${esc(c.fb)}</div>`;
+    await speak(c.fb);
+    await sleep(600);
+    talk.i++;
+    talk.i < talk.s.turns.length ? talkTurn() : talkEnd();
+  } else {
+    talk.tries++;
+    btn?.classList.add("wrong"); if (btn) btn.disabled = true;
+    document.getElementById("fb").innerHTML = `<div class="feedback bad">🤔 ${esc(c.fb)}</div>`;
+    await speak(c.fb);
+  }
+}
+async function talkSpeak() {
+  const t = talk.s.turns[talk.i], mic = document.getElementById("mic");
+  if (mic.classList.contains("on")) { listenOnce.stop?.(); return; }
+  mic.classList.add("on"); mic.innerHTML = "⏹<br><span style='font-size:.5em'>說完按我</span>";
+  let said = "";
+  try { said = await listenOnce(); } catch (e) { said = ""; }
+  mic.classList.remove("on"); mic.innerHTML = "🎤<br><span style='font-size:.5em'>用說的回答</span>";
+  if (!said) { document.getElementById("fb").innerHTML = `<div class="feedback bad">沒有聽清楚，再說一次，或選一個回答。</div>`; return; }
+  const match = t.keys.some(k => heard(said, k)) && !/^(嗯|喔|哦|啊)$/.test(norm(said));
+  if (match) judge({ good: true, text: said, fb: "很好！有回答到他問的。" });
+  else judge({ good: false, fb: `你說「${said}」。${t.tip}` });
+}
+function talkEnd() {
+  const n = talk.s.turns.length;
+  logResult("talk", "對話：" + talk.s.title, talk.good, n);
+  $app.innerHTML = `
+    ${renderBubbles()}
+    <div class="card center">
+      <div class="big-emoji">🎉</div>
+      <div class="question">對話完成了！</div>
+      <div>${n} 句裡面，第一次就回答得很好的有 ${talk.good} 句。</div>
+    </div>
+    <div class="row">
+      <button class="btn big" onclick="startTalk('${talk.s.id}')">再練一次</button>
+      <button class="btn big light" onclick="go('talkList')">換一個情境</button>
+    </div>`;
+  speak("對話完成了，很棒！");
+}
+
+/* ============================================================
+   家人設定
+   ============================================================ */
+function family() {
+  const c = customItems();
+  const h = store.get("history", []);
+  const fmt = t => { const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
+  $app.innerHTML = `
+    <div class="card">
+      <div class="question">聲音與字體</div>
+      <label class="field">說話速度</label>
+      <div class="seg" id="rateSeg">
+        ${[[0.6, "很慢"], [0.75, "慢"], [0.9, "普通"], [1.05, "正常人"]].map(([v, l]) => `<button data-v="${v}" class="${settings.rate == v ? "on" : ""}">${l}</button>`).join("")}
+      </div>
+      <div class="muted">建議先用「慢」，熟悉以後改成「普通」或「正常人」的速度。</div>
+      <label class="field">字體大小</label>
+      <div class="seg" id="fsSeg">
+        ${[["m", "大"], ["l", "更大"], ["xl", "特大"]].map(([v, l]) => `<button data-v="${v}" class="${settings.fs === v ? "on" : ""}">${l}</button>`).join("")}
+      </div>
+      <label class="field">怎麼稱呼他（首頁會叫他）</label>
+      <input type="text" id="nameIn" placeholder="例如：爸爸、阿嬤" value="${esc(settings.name)}">
+      <div class="row" style="margin-top:14px"><button class="btn small light" onclick="speak('你好，這是現在的說話速度。')">🔊 試聽</button></div>
+    </div>
+
+    <div class="card">
+      <div class="question">自己出題目</div>
+      <div class="muted">用家裡常講的話出題最有效。例如他常常聽漏的那種句子。</div>
+      <label class="field">一句話</label>
+      <textarea id="cText" placeholder="例如：禮拜天早上，阿明會開車載你去市場，你在門口等他。"></textarea>
+      <div id="cParts"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn small light" onclick="addPartRow()">＋ 再加一個重點</button>
+        <button class="btn small" onclick="saveCustom()">儲存這一題</button>
+      </div>
+      <div id="cMsg"></div>
+      ${c.length ? `<div class="question" style="margin-top:22px;font-size:1em">已經出的題目（${c.length}）</div>
+        <ul class="item-list">${c.map((x, i) => `<li><span>${esc(x.text)}</span>
+          <span style="display:flex;gap:6px"><button class="btn small light" onclick="speak(customItems()[${i}].text)">🔊</button>
+          <button class="btn small light" onclick="delCustom(${i})">刪除</button></span></li>`).join("")}</ul>` : ""}
+    </div>
+
+    <div class="card">
+      <div class="question">練習紀錄</div>
+      ${h.length ? `<table class="stats"><tr><th>時間</th><th>練習</th><th>表現</th></tr>
+        ${h.slice(0, 30).map(r => `<tr><td>${fmt(r.t)}</td><td>${esc(r.title)}</td><td>${r.got} / ${r.total}</td></tr>`).join("")}</table>
+        <div class="row" style="margin-top:14px"><button class="btn small light" onclick="if(confirm('確定清除紀錄？')){store.set('history',[]);family()}">清除紀錄</button></div>`
+      : `<div class="muted">還沒有紀錄。</div>`}
+    </div>
+
+    <div class="card">
+      <div class="question">給家人的小建議</div>
+      <ul style="font-size:.85em;margin:0;padding-left:1.2em">
+        <li>每天練 5～10 分鐘就好，不要太累。</li>
+        <li>先練「聽懂練習」簡單級，答得好再換中等、進階。</li>
+        <li>平常跟他說話時，也可以像這裡一樣：一句話講完，問他「什麼時候？去哪裡？」確認他聽到全部。</li>
+        <li>鼓勵他聽不清楚就說「請再說一次」。</li>
+        <li>如果常常聽不清楚，建議也帶去檢查聽力，可能是聽力退化的關係。</li>
+      </ul>
+    </div>`;
+  document.querySelectorAll("#rateSeg button").forEach(b => b.onclick = () => { settings.rate = +b.dataset.v; saveSettings(); family(); speak("這是現在的說話速度。"); });
+  document.querySelectorAll("#fsSeg button").forEach(b => b.onclick = () => { settings.fs = b.dataset.v; saveSettings(); family(); });
+  document.getElementById("nameIn").onchange = e => { settings.name = e.target.value.trim(); saveSettings(); };
+  addPartRow(); addPartRow();
+}
+function addPartRow() {
+  const wrap = document.getElementById("cParts");
+  const n = wrap.children.length;
+  if (n >= 4) return;
+  const d = document.createElement("div");
+  d.className = "card"; d.style.background = "#faf8f3"; d.style.marginTop = "14px"; d.style.padding = "16px";
+  d.innerHTML = `
+    <div class="muted">重點 ${n + 1}</div>
+    <label class="field">問題</label><input type="text" class="pq" placeholder="例如：什麼時候？">
+    <label class="field">正確答案（要是句子裡的字）</label><input type="text" class="pk" placeholder="例如：禮拜天早上">
+    <label class="field">兩個錯的選項</label>
+    <div class="pair"><input type="text" class="pw1" placeholder="例如：今天晚上"><input type="text" class="pw2" placeholder="例如：禮拜一"></div>`;
+  wrap.appendChild(d);
+}
+function saveCustom() {
+  const text = document.getElementById("cText").value.trim();
+  const parts = [];
+  document.querySelectorAll("#cParts > .card").forEach(d => {
+    const q = d.querySelector(".pq").value.trim(), key = d.querySelector(".pk").value.trim();
+    const w = [d.querySelector(".pw1").value.trim(), d.querySelector(".pw2").value.trim()].filter(Boolean);
+    if (q && key) parts.push({ key, q, opts: [key, ...w] });
+  });
+  const msg = document.getElementById("cMsg");
+  if (!text || !parts.length) { msg.innerHTML = `<div class="feedback bad">請填一句話，和至少一個重點（問題＋正確答案）。</div>`; return; }
+  const notIn = parts.filter(p => !text.includes(p.key));
+  if (notIn.length) { msg.innerHTML = `<div class="feedback bad">「${esc(notIn[0].key)}」不在句子裡面，請用句子裡的字。</div>`; return; }
+  parts.forEach(p => { if (p.opts.length < 2) p.opts.push("我不知道"); });
+  const c = customItems(); c.push({ text, parts, level: parts.length }); store.set("custom", c);
+  family();
+  document.getElementById("cMsg").innerHTML = `<div class="feedback good">已儲存！在「聽懂練習」或「跟著說」裡選「家人出的題目」。</div>`;
+}
+function delCustom(i) {
+  if (!confirm("確定刪除這一題？")) return;
+  const c = customItems(); c.splice(i, 1); store.set("custom", c); family();
+}
+
+/* ============================================================
+   路由
+   ============================================================ */
+function go(page) {
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  window.scrollTo(0, 0);
+  ({
+    home,
+    listenLevels: () => { setTitle("👂 聽懂練習"); levelPicker("listen"); },
+    repeatLevels: () => { setTitle("🗣️ 跟著說"); levelPicker("repeat"); },
+    talkList: () => { setTitle("💬 對話練習"); talkList(); },
+    family: () => { setTitle("⚙️ 家人設定"); family(); },
+  })[page]();
+}
+applyFont();
+go("home");
+if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>
